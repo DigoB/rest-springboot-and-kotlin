@@ -1,6 +1,8 @@
 package com.rodrigobraz.restspringboot.services
 
+import com.rodrigobraz.restspringboot.data.vo.v1.PersonVO
 import com.rodrigobraz.restspringboot.exceptions.ResourceNotFoundException
+import com.rodrigobraz.restspringboot.mapper.DozerMapper
 import com.rodrigobraz.restspringboot.models.Person
 import com.rodrigobraz.restspringboot.repositories.PersonRepository
 import org.hibernate.ResourceClosedException
@@ -16,25 +18,31 @@ class PersonService {
 
     private val logger = Logger.getLogger(PersonService::class.java.name)
 
-    fun findAll() : List<Person> {
+    fun findAll() : List<PersonVO> {
         logger.info("Finding all persons...")
 
-        return repository.findAll()
+        val persons = repository.findAll()
+
+        return DozerMapper.parseListObjects(persons, PersonVO::class.java)
     }
 
-    fun findById(id: Long) : Person {
+    fun findById(id: Long) : PersonVO {
         logger.info("Searching person...")
 
-        return repository.findById(id)
+        var person = repository.findById(id)
             .orElseThrow{ ResourceNotFoundException("No records found for this id.")}
+
+        return DozerMapper.parseObject(person, PersonVO::class.java)
     }
 
-    fun createPerson(person: Person) : Person {
+    fun createPerson(person: PersonVO) : PersonVO {
         logger.info("Creating one person with name ${person.firstName}")
-        return repository.save(person)
+
+        var entity: Person = DozerMapper.parseObject(person, Person::class.java)
+        return DozerMapper.parseObject(repository.save(entity), PersonVO::class.java)
     }
 
-    fun updatePerson(person: Person) : Person{
+    fun updatePerson(person: PersonVO) : PersonVO{
 
         logger.info("Updating one person with id $person.id")
 
@@ -45,7 +53,7 @@ class PersonService {
         entity.address = person.address
         entity.gender = person.gender
 
-        return repository.save(entity)
+        return DozerMapper.parseObject(repository.save(entity), PersonVO::class.java)
     }
 
     fun deletePerson(id: Long) {
