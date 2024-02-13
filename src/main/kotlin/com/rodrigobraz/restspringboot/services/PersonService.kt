@@ -2,7 +2,7 @@ package com.rodrigobraz.restspringboot.services
 
 import com.rodrigobraz.restspringboot.data.vo.v1.PersonVO
 import com.rodrigobraz.restspringboot.exceptions.ResourceNotFoundException
-import com.rodrigobraz.restspringboot.mapper.DozerMapper
+import com.rodrigobraz.restspringboot.mapper.Mapper
 import com.rodrigobraz.restspringboot.models.Person
 import com.rodrigobraz.restspringboot.repositories.PersonRepository
 import org.hibernate.ResourceClosedException
@@ -23,7 +23,7 @@ class PersonService {
 
         val persons = repository.findAll()
 
-        return DozerMapper.parseListObjects(persons, PersonVO::class.java)
+        return Mapper.parseListObjects(persons, PersonVO::class.java)
     }
 
     fun findById(id: Long) : PersonVO {
@@ -32,14 +32,14 @@ class PersonService {
         var person = repository.findById(id)
             .orElseThrow{ ResourceNotFoundException("No records found for this id.")}
 
-        return DozerMapper.parseObject(person, PersonVO::class.java)
+        return Mapper.parseObject(person, PersonVO::class.java)
     }
 
     fun createPerson(person: PersonVO) : PersonVO {
         logger.info("Creating one person with name ${person.firstName}")
 
-        var entity: Person = DozerMapper.parseObject(person, Person::class.java)
-        return DozerMapper.parseObject(repository.save(entity), PersonVO::class.java)
+        var entity: Person = Mapper.parseObject(person, Person::class.java)
+        return Mapper.parseObject(repository.save(entity), PersonVO::class.java)
     }
 
     fun updatePerson(person: PersonVO) : PersonVO{
@@ -53,7 +53,7 @@ class PersonService {
         entity.address = person.address
         entity.gender = person.gender
 
-        return DozerMapper.parseObject(repository.save(entity), PersonVO::class.java)
+        return Mapper.parseObject(repository.save(entity), PersonVO::class.java)
     }
 
     fun deletePerson(id: Long) {
